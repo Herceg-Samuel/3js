@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Three.js Rotation: Origin vs Fixed Point</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #111;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000,
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      camera.position.z = 5;
+
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0.5);
+      shape.lineTo(-0.5, -0.5);
+      shape.lineTo(0.5, -0.5);
+      shape.lineTo(0, 0.5);
+
+      const geometry = new THREE.ShapeGeometry(shape);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x87ceeb,
+        side: THREE.DoubleSide,
+      });
+
+      const triangleOrigin = new THREE.Mesh(geometry, material);
+      triangleOrigin.position.x = -2;
+      scene.add(triangleOrigin);
+
+      const pivot = new THREE.Object3D();
+      pivot.position.set(2, 0, 0);
+      scene.add(pivot);
+
+      const triangleFixed = new THREE.Mesh(geometry, material);
+      triangleFixed.position.set(0.5, 0.5, 0);
+      pivot.add(triangleFixed);
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const speed = 0.02;
+
+        const time = Date.now() * 0.001;
+        triangleOrigin.position.x = Math.cos(time) * 2;
+        triangleOrigin.position.y = Math.sin(time) * 2;
+        triangleOrigin.rotation.z += speed;
+
+        pivot.rotation.z += speed;
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
